@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './CheckmarkButton.css';
+import { BillingList } from './components/BillingList';
 
 import "./App.css";
 const devMode = !window.invokeNative;
@@ -23,73 +24,59 @@ const App = () => {
         await fetchNui("payBill", { id: id });
     };
 
+    const setupSettings = async () => {
+        if (!devMode) {
+            const settings = await getSettings();
+            setDarkMode(settings.display.theme === "dark");
+            onSettingsChange(newSettings => setDarkMode(newSettings.display.theme === "dark"));
+        }
+    };
+
+    const setupBillings = async () => {
+        if (!devMode) {
+            const newBillings = await fetchNui("setupApp", {});
+            setBillings(newBillings);
+        }
+    };
+
+    const handleIncomingMessages = (event) => {
+        if (event.data.action === "refreshBillings") {
+            setBillings(event.data.billings);
+        }
+    };
+
     useEffect(() => {
         if (devMode) {
-            document.getElementsByTagName("html")[0].style.visibility = "visible";
-            document.getElementsByTagName("body")[0].style.visibility = "visible";
+            document.documentElement.style.visibility = "visible";
+            document.body.style.visibility = "visible";
             return;
-        }
-
-        const setupSettings = async () => {
-            if (devMode) return;
-
-            getSettings().then((settings) => setDarkMode(settings.display.theme === "dark"));
-            onSettingsChange((settings) => setDarkMode(settings.display.theme === "dark"));
-        };
-
-        const setupBillings = async () => {
-            if (devMode) return;
-
-            let newBillings = await fetchNui("setupApp", {});
-            setBillings(newBillings);
         }
 
         setupSettings();
         setupBillings();
+        window.addEventListener("message", handleIncomingMessages);
 
-        window.addEventListener("message", async (event) => {
-            switch (event.data.action) {
-                case "refreshBillings":
-                    setBillings(event.data.billings);
-                    break;
-                default:
-                    break;
-            }
-        });
-
+        //Unmount her, så derfor fjerner vi vores event listeners og setbillings cleaner vi så den er klar til brug igen når den mountes for at undgå react fejl.
         return () => {
+            window.removeEventListener("message", handleIncomingMessages);
             setBillings([]);
-        }
+        };
     }, [fetchNui, getSettings, onSettingsChange]);
 
     return (
         <AppProvider>
             <div className={`app ${isDarkMode ? "dark" : "light"}`} ref={appDiv}>
-                <div className={`app-content`}>
+                <div className="app-content">
                     <h1 className="headline">Faktura/Bøder</h1>
-                    <div className={`player-billings`}>
-                        {billings.map((billing, index) => (
-                            <div key={index} className="billing-container">
-                                <div className="container-header">
-                                    <h1>{ billing.label }</h1>
-                                    <h1>{ billing.amount }</h1>
-                                    <div className={`checkmark-wrapper ${billing.isAnimating ? 'checkmarked' : ''}`} onClick={() => handleButtonClick(billing.id)}>
-                                        <span className={`checkmark ${billing.isAnimating ? 'animate-checkmark' : ''}`}></span>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                    <BillingList billings={billings} onButtonClick={handleButtonClick} />
                 </div>
             </div>
         </AppProvider>
     );
 };
 
-const AppProvider = ({ children }) => {
-    if (devMode) {
-        return <div className='dev-wrapper'>{children}</div>;
-    } else return children;
-};
+const AppProvider = ({ children }) => (
+    devMode ? <div className='dev-wrapper'>{children}</div> : children
+);
 
 export default App;
