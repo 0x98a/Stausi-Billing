@@ -6,37 +6,33 @@ import "./App.css";
 const devMode = !window.invokeNative;
 
 const App = () => {
+        //Smider alle const sammen her, eller samme dem som har noget med react at gøre, fx useRef og useState som er fra react.
     const [isDarkMode, setDarkMode] = useState(true);
-    const [billings, setBillings] = useState([]);
-
+    const [billings, setBillings] = useState([
+        {
+            id: 1,
+            label: "Mekaniker regning",
+            amount: "123 dkk",
+            isAnimating: false,
+        },
+        {
+            id: 1,
+            label: "Mekaniker regning",
+            amount: "123 dkk",
+            isAnimating: false,
+        },
+    ]);
     const appDiv = useRef(null);
+    
     const { fetchNui, getSettings, onSettingsChange } = window;
 
-    async function handleButtonClick(id) {
-        const updatedBillings = billings.map(billing => {
-            if (billing.id === id) {
-                return { ...billing, isAnimating: true };
-            }
-            return billing;
-        });
-        
-        setBillings(updatedBillings);
-        await fetchNui("payBill", { id: id });
-    };
+    //Map billings i selve setBillings funktionen så vi har ikk brug for den anden ligegyldige funktion, bare mere clean
+    const handleButtonClick = async (id) => {
+        setBillings(billings.map(billing => 
+            billing.id === id ? { ...billing, isAnimating: true } : billing
+        ));
 
-    const setupSettings = async () => {
-        if (!devMode) {
-            const settings = await getSettings();
-            setDarkMode(settings.display.theme === "dark");
-            onSettingsChange(newSettings => setDarkMode(newSettings.display.theme === "dark"));
-        }
-    };
-
-    const setupBillings = async () => {
-        if (!devMode) {
-            const newBillings = await fetchNui("setupApp", {});
-            setBillings(newBillings);
-        }
+        await fetchNui("payBill", { id });
     };
 
     const handleIncomingMessages = (event) => {
@@ -51,6 +47,21 @@ const App = () => {
             document.body.style.visibility = "visible";
             return;
         }
+
+        const setupSettings = async () => {
+            if (!devMode) {
+                const settings = await getSettings();
+                setDarkMode(settings.display.theme === "dark");
+                onSettingsChange(newSettings => setDarkMode(newSettings.display.theme === "dark"));
+            }
+        };
+
+        const setupBillings = async () => {
+            if (!devMode) {
+                const newBillings = await fetchNui("setupApp", {});
+                setBillings(newBillings);
+            }
+        };
 
         setupSettings();
         setupBillings();
@@ -68,6 +79,12 @@ const App = () => {
             <div className={`app ${isDarkMode ? "dark" : "light"}`} ref={appDiv}>
                 <div className="app-content">
                     <h1 className="headline">Faktura/Bøder</h1>
+                    {billings.length > 0 &&
+                        <p className="text-center-white">
+    {billings.length} faktura{billings.length > 1 && "er"} / bøde{billings.length > 1 && "r"} i alt
+</p>
+                    }
+
                     <BillingList billings={billings} onButtonClick={handleButtonClick} />
                 </div>
             </div>

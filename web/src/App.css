@@ -9,12 +9,11 @@
 }
 
 .app h1.headline {
-    margin: 0;
-    padding: 1rem 1rem .5rem;
     margin-top: 2rem;
-    margin-bottom: .5rem;
     text-align: center;
 }
+
+
 
 .app .footer button:hover {
     cursor: pointer;
@@ -106,4 +105,20 @@
 
     width: 29rem;
     height: 58.5rem;
+}
+
+.flex-center {
+    display: flex;
+    justify-items: center;
+    align-items: center;
+    width: 100%;
+    height: 2rem;
+    border: 2px solid #fff;
+}
+
+.text-center-white {
+    margin: 0;
+    text-align: center;
+    color: #fff;
+    padding-bottom: 1rem;
 }
