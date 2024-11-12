@@ -5,22 +5,20 @@ import "./App.css";
 const devMode = !window.invokeNative;
 
 const App = () => {
+    //Smider alle const sammen her, eller samme dem som har noget med react at gøre, fx useRef og useState som er fra react.
     const [isDarkMode, setDarkMode] = useState(true);
     const [billings, setBillings] = useState([]);
-
     const appDiv = useRef(null);
+
     const { fetchNui, getSettings, onSettingsChange } = window;
 
-    async function handleButtonClick(id) {
-        const updatedBillings = billings.map(billing => {
-            if (billing.id === id) {
-                return { ...billing, isAnimating: true };
-            }
-            return billing;
-        });
-        
-        setBillings(updatedBillings);
-        await fetchNui("payBill", { id: id });
+    //Map billings i selve setBillings funktionen så vi har ikk brug for den anden ligegyldige funktion, bare mere clean
+    const handleButtonClick = async (id) => {
+        setBillings(billings.map(billing => 
+            billing.id === id ? { ...billing, isAnimating: true } : billing
+        ));
+
+        await fetchNui("payBill", { id });
     };
 
     useEffect(() => {
