@@ -8,20 +8,7 @@ const devMode = !window.invokeNative;
 const App = () => {
         //Smider alle const sammen her, eller samme dem som har noget med react at gøre, fx useRef og useState som er fra react.
     const [isDarkMode, setDarkMode] = useState(true);
-    const [billings, setBillings] = useState([
-        {
-            id: 1,
-            label: "Mekaniker regning",
-            amount: "123 dkk",
-            isAnimating: false,
-        },
-        {
-            id: 1,
-            label: "Mekaniker regning",
-            amount: "123 dkk",
-            isAnimating: false,
-        },
-    ]);
+    const [billings, setBillings] = useState([]);
     const appDiv = useRef(null);
     
     const { fetchNui, getSettings, onSettingsChange } = window;
@@ -80,9 +67,7 @@ const App = () => {
                 <div className="app-content">
                     <h1 className="headline">Faktura/Bøder</h1>
                     {billings.length > 0 &&
-                        <p className="text-center-white">
-    {billings.length} faktura{billings.length > 1 && "er"} / bøde{billings.length > 1 && "r"} i alt
-</p>
+                        <p className="text-center-white">{billings.length} faktura{billings.length > 1 && "er"} / bøde{billings.length > 1 && "r"} i alt</p>
                     }
 
                     <BillingList billings={billings} onButtonClick={handleButtonClick} />
