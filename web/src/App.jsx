@@ -63,17 +63,29 @@ const App = () => {
 
     return (
         <AppProvider>
-            <div className={`app ${isDarkMode ? "dark" : "light"}`} ref={appDiv}>
-                <div className="app-content">
-                    <h1 className="headline">Faktura/Bøder</h1>
-                    {billings.length > 0 &&
-                        <p className="text-center-white">{billings.length} faktura{billings.length > 1 && "er"} / bøde{billings.length > 1 && "r"} i alt</p>
-                    }
-
-                    <BillingList billings={billings} onButtonClick={handleButtonClick} />
+        <div className={`app ${isDarkMode ? "dark" : "light"}`} ref={appDiv}>
+            <div className={`app-content`}>
+                <h1 className="headline">Faktura/Bøder</h1>
+                <div className={`player-billings`}>
+                    {billings.length === 0 ? (
+                        <p className="no-bills">Du har ingen Faktura/Bøder</p>
+                    ) : (
+                        billings.map((billing, index) => (
+                            <div key={index} className="billing-container">
+                                <div className="container-header">
+                                    <h1>{ billing.label }</h1>
+                                    <h1>{ billing.amount }</h1>
+                                    <div className={`checkmark-wrapper ${billing.isAnimating ? 'checkmarked' : ''}`} onClick={() => handleButtonClick(billing.id)}>
+                                        <span className={`checkmark ${billing.isAnimating ? 'animate-checkmark' : ''}`}></span>
+                                    </div>
+                                </div>
+                            </div>
+                        ))
+                    )}
                 </div>
             </div>
-        </AppProvider>
+        </div>
+    </AppProvider>
     );
 };
 
