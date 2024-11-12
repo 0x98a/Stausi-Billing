@@ -5,6 +5,11 @@ local appInfo = {
 }
 
 Citizen.CreateThread(function()
+	if GetResourceState("lb-phone") == "missing" do
+        print("Stausi_billing: LB-Phone resource is missing")
+        return
+    end
+
 	while GetResourceState("lb-phone") ~= "started" do
         Wait(500)
     end
@@ -19,7 +24,7 @@ Citizen.CreateThread(function()
     })
 
     if not added then
-        print("Could not add app:", errorMessage)
+        print("Stausi_billing: Could not add app:", errorMessage)
     end
 end)
 
@@ -43,6 +48,7 @@ end)
 
 RegisterNetEvent("esx_billing:addBill", function()
     local playerBills = lib.callback.await('st_billing_app:GetBills', false)
+    
     exports["lb-phone"]:SendCustomAppMessage(appInfo.identifier, {
         action = "refreshBillings",
         billings = playerBills

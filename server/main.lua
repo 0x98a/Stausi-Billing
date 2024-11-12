@@ -101,13 +101,13 @@ lib.callback.register('st_billing_app:GetBills', function(source)
     return billings
 end)
 
-ESX.RegisterServerCallback('esx_billing:getBills', function(source, cb, reOpen)
+lib.callback.register('esx_billing:getBills', function(source, reOpen)
 	local xPlayer = ESX.GetPlayerFromId(source)
 	local time = os.nanotime()
 
 	if reOpen then
 		Debug(("Sended %s bills to %s - In %s ms"):format(#cached_players[xPlayer.identifier], xPlayer.identifier, (os.nanotime() - time) / 1000000))
-		cb(cached_players[xPlayer.identifier])
+		return cached_players[xPlayer.identifier]
 	end
 
 	if not reOpen then
@@ -133,12 +133,12 @@ ESX.RegisterServerCallback('esx_billing:getBills', function(source, cb, reOpen)
 			cached_players[xPlayer.identifier] = deepcopy(bills)
 			Debug(("Send %s bills to %s - In %s ms"):format(#cached_players[xPlayer.identifier], xPlayer.identifier, (os.nanotime() - time) / 1000000))
 
-			cb(bills)
+			return bills
 		end)
 	end
 end)
 
-ESX.RegisterServerCallback('esx_billing:getTargetBills', function(source, cb, target)
+lib.callback.register('esx_billing:getTargetBills', function(source, target)
 	local xPlayer = ESX.GetPlayerFromId(target)
 
 	MySQL.query('SELECT * FROM billing WHERE identifier = @identifier', {
@@ -160,11 +160,11 @@ ESX.RegisterServerCallback('esx_billing:getTargetBills', function(source, cb, ta
 			end
 		end
 
-		cb(bills)
+		return bills
 	end)
 end)
 
-ESX.RegisterServerCallback('esx_billing:payBill', function(source, cb, id)
+lib.callback.register('esx_billing:payBill', function(source, id)
 	local xPlayer = ESX.GetPlayerFromId(source)
 	local time = os.nanotime()
 
@@ -182,6 +182,7 @@ ESX.RegisterServerCallback('esx_billing:payBill', function(source, cb, id)
 		local label = result[1].label
 
 		local xTarget = ESX.GetPlayerFromIdentifier(sender)
+
 		if targetType ~= 'player' then
 			TriggerEvent('esx_addonaccount:getSharedAccount', target, function(account)
 				if xPlayer.getAccount('bank').money >= amount then
@@ -216,22 +217,19 @@ ESX.RegisterServerCallback('esx_billing:payBill', function(source, cb, id)
 						TriggerEvent("esx_billing:paidBill", id, target, amount, xPlayer, sender)
 						Debug(("%s paid %s,- DKK (%s) to %s - In %s ms"):format(xPlayer.identifier, GroupDigits(amount), id, account.name, (os.nanotime() - time) / 1000000))
 
-						cb(cached_players[xPlayer.identifier])
+						return cached_players[xPlayer.identifier]
 					end)
 				else
 					TriggerClientEvent('esx:showNotification', xPlayer.source, "Du har ikke penge til dette.")
-					cb(cached_players[xPlayer.identifier])
+					return cached_players[xPlayer.identifier]
 				end
 			end)
 		end
 	end)
+    local inventory = target and Inventory(target) or Inventory(source)
+    return (inventory and Inventory.GetItem(inventory, item, metadata, true)) or 0
 end)
 
-payCity = function(amount)
-	TriggerEvent('esx_addonaccount:getSharedAccount', 'society_city', function(account)
-		account.addMoney(amount)
-	end)
-end
 
 AddEventHandler('playerDropped', function(reason)
 	local _source = source

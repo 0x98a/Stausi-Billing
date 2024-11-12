@@ -6,7 +6,7 @@ import "./App.css";
 const devMode = !window.invokeNative;
 
 const App = () => {
-        //Smider alle const sammen her, eller samme dem som har noget med react at gøre, fx useRef og useState som er fra react.
+    //Smider alle const sammen her, eller samme dem som har noget med react at gøre, fx useRef og useState som er fra react.
     const [isDarkMode, setDarkMode] = useState(true);
     const [billings, setBillings] = useState([]);
     const appDiv = useRef(null);
@@ -38,6 +38,7 @@ const App = () => {
         const setupSettings = async () => {
             if (!devMode) {
                 const settings = await getSettings();
+
                 setDarkMode(settings.display.theme === "dark");
                 onSettingsChange(newSettings => setDarkMode(newSettings.display.theme === "dark"));
             }
@@ -46,12 +47,14 @@ const App = () => {
         const setupBillings = async () => {
             if (!devMode) {
                 const newBillings = await fetchNui("setupApp", {});
+
                 setBillings(newBillings);
             }
         };
 
         setupSettings();
         setupBillings();
+
         window.addEventListener("message", handleIncomingMessages);
 
         //Unmount her, så derfor fjerner vi vores event listeners og setbillings cleaner vi så den er klar til brug igen når den mountes for at undgå react fejl.
@@ -63,29 +66,20 @@ const App = () => {
 
     return (
         <AppProvider>
-        <div className={`app ${isDarkMode ? "dark" : "light"}`} ref={appDiv}>
-            <div className={`app-content`}>
-                <h1 className="headline">Faktura/Bøder</h1>
-                <div className={`player-billings`}>
-                    {billings.length === 0 ? (
-                        <p className="no-bills">Du har ingen Faktura/Bøder</p>
-                    ) : (
-                        billings.map((billing, index) => (
-                            <div key={index} className="billing-container">
-                                <div className="container-header">
-                                    <h1>{ billing.label }</h1>
-                                    <h1>{ billing.amount }</h1>
-                                    <div className={`checkmark-wrapper ${billing.isAnimating ? 'checkmarked' : ''}`} onClick={() => handleButtonClick(billing.id)}>
-                                        <span className={`checkmark ${billing.isAnimating ? 'animate-checkmark' : ''}`}></span>
-                                    </div>
-                                </div>
-                            </div>
-                        ))
-                    )}
+            <div className={`app ${isDarkMode ? "dark" : "light"}`} ref={appDiv}>
+                <div className={`app-content`}>
+                    <h1 className="headline">Faktura/Bøder</h1>
+                    <div className={`player-billings`}>
+                        {/* Ændret fra === til være 0, hvis nogle bugger den og den på en mystisk måde bliver -1, så ville den ik prøve at render */}
+                        {billings.length <= 0 ? (
+                            <p className="no-bills">Du har ingen fakturaer/bøder at betale</p>
+                        ) : (
+                            <BillingList billings={billings} onButtonClick={handleButtonClick} />
+                        )}
+                    </div>
                 </div>
             </div>
-        </div>
-    </AppProvider>
+        </AppProvider>
     );
 };
 
