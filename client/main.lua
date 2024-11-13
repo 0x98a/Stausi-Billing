@@ -35,13 +35,13 @@ end)
 RegisterNUICallback("payBill", function(data, cb)
 	local bill_id = data.id
 
-	ESX.TriggerServerCallback('esx_billing:payBill', function(playerBills)
+    lib.callback('esx_billing:payBill', false, function(playerBills)
 		Citizen.Wait(500)
 		exports["lb-phone"]:SendCustomAppMessage(appInfo.identifier, {
 			action = "refreshBillings",
 			billings = playerBills
 		})
-	end, bill_id)
+    end, bill_id)
 
     cb('ok')
 end)
