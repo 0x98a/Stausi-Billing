@@ -2,6 +2,33 @@ lib.locale()
 
 local cached_players = {}
 
+MySQL.ready(function()
+    MySQL.query('SHOW TABLES LIKE \'billing\'', {}, function(exists)
+        if #tableExists == 0 or not exists then
+			--Create table her
+            local tableCreation = MySQL.Sync.execute()
+
+            if tableCreation then
+				print("Created billing table")
+
+            else
+                print("Failed to create billing table")
+            end
+        else 
+
+			MySQL.query('SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_NAME = \'billing\' AND COLUMN_NAME = \'time\'', {}, function(count)
+				if count and #count[1] == 0 then
+					-- alter table her
+				else
+					--Check her om time er int(11)
+				end
+			end)
+
+		end
+    end)
+end)
+
+
 RegisterServerEvent('esx_billing:sendBill')
 AddEventHandler('esx_billing:sendBill', function(playerId, sharedAccountName, label, amount, note)
 	local _source = source
