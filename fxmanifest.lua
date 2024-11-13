@@ -3,7 +3,7 @@ games { 'gta5' }
 
 author 'Stausi'
 description 'Stausi Billing'
-version 'v1.0.3'
+version 'v1.0.4'
 lua54 'yes'
 
 server_scripts {
@@ -16,6 +16,7 @@ client_scripts {
 }
 
 shared_scripts {
+	'@es_extended/imports.lua',
 	'@ox_lib/init.lua',
 	'config.lua',
 }
@@ -31,10 +32,7 @@ escrow_ignore {
 
 files {
     "web/build/**/*",
+	'locales/*.json',
 }
 
 ui_page 'web/build/index.html'
-
-shared_script {
-    '@es_extended/imports.lua'
-}
